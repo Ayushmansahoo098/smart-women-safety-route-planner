@@ -1,11 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Navigate, Route, Routes, useLocation } from "react-router-dom";
+import AuthPage from "./components/AuthPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
-import LoginPage from "./pages/LoginPage";
 import NotFoundPage from "./pages/NotFoundPage";
-import RegisterPage from "./pages/RegisterPage";
 
 function PageTransition({ children }) {
   return (
@@ -24,15 +23,22 @@ function PageTransition({ children }) {
 export default function App() {
   const location = useLocation();
 
+  // For auth routes (/login, /register) we only key by the "auth" group
+  // so AnimatePresence does NOT trigger a full page transition between them.
+  const routeKey =
+    location.pathname === "/login" || location.pathname === "/register"
+      ? "auth"
+      : location.pathname;
+
   return (
     <AnimatePresence mode="wait">
-      <Routes location={location} key={location.pathname}>
+      <Routes location={location} key={routeKey}>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route
           path="/login"
           element={
             <PageTransition>
-              <LoginPage />
+              <AuthPage initialMode="login" />
             </PageTransition>
           }
         />
@@ -40,7 +46,7 @@ export default function App() {
           path="/register"
           element={
             <PageTransition>
-              <RegisterPage />
+              <AuthPage initialMode="signup" />
             </PageTransition>
           }
         />
