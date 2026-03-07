@@ -1,48 +1,67 @@
-# Smart Women Safety Route Planner
+# 🛡️ Smart Women Safety Route Planner
 
-Production-ready full-stack authentication module with:
-- React (Vite), Tailwind CSS, React Router DOM, Axios, Framer Motion
-- Node.js (ESM), Express, MongoDB (Mongoose), JWT, bcrypt, dotenv
+> A production-ready full-stack authentication system with secure JWT-based middleware, real-time password validation, and a modern glassmorphic UI.
 
-## Folder Structure
+[![Node.js](https://img.shields.io/badge/Node.js-20+-green?logo=node.js)](https://nodejs.org/)
+[![React](https://img.shields.io/badge/React-18+-blue?logo=react)](https://react.dev/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Latest-green?logo=mongodb)](https://www.mongodb.com/)
+[![MIT License](https://img.shields.io/badge/License-MIT-yellow)](LICENSE)
+
+## 🚀 Tech Stack
+
+**Frontend:**
+- React 18+ with Vite
+- Tailwind CSS for styling
+- React Router DOM for navigation
+- Framer Motion for animations
+- Axios for API requests
+
+**Backend:**
+- Node.js with ES Modules
+- Express.js framework
+- MongoDB + Mongoose ODM
+- JWT authentication
+- bcrypt for password hashing
+
+## 📁 Project Structure
 
 ```text
 smart-women-safety-route-planner/
-├── backend/
+├── backend/                    # Node.js + Express API server
 │   ├── src/
-│   │   ├── config/
+│   │   ├── config/            # Database & Passport configuration
 │   │   │   └── db.js
-│   │   ├── controllers/
+│   │   ├── controllers/        # Request handlers
 │   │   │   ├── authController.js
 │   │   │   └── dashboardController.js
-│   │   ├── middleware/
+│   │   ├── middleware/         # Authentication & database middleware
 │   │   │   ├── authMiddleware.js
 │   │   │   └── databaseMiddleware.js
-│   │   ├── models/
+│   │   ├── models/             # Mongoose schemas
 │   │   │   └── User.js
-│   │   ├── routes/
+│   │   ├── routes/             # API route definitions
 │   │   │   ├── authRoutes.js
 │   │   │   └── protectedRoutes.js
-│   │   ├── utils/
+│   │   ├── utils/              # Helper utilities
 │   │   │   └── passwordValidation.js
-│   │   ├── app.js
-│   │   └── server.js
+│   │   ├── app.js              # Express app setup
+│   │   └── server.js           # Server entry point
 │   ├── .env.example
 │   └── package.json
-├── frontend/
+├── frontend/                   # React + Vite frontend app
 │   ├── src/
-│   │   ├── components/
+│   │   ├── components/         # Reusable UI components
 │   │   │   └── ProtectedRoute.jsx
-│   │   ├── layouts/
+│   │   ├── layouts/            # Page layouts
 │   │   │   └── AuthLayout.jsx
-│   │   ├── pages/
+│   │   ├── pages/              # Page components
 │   │   │   ├── DashboardPage.jsx
 │   │   │   ├── LoginPage.jsx
 │   │   │   ├── NotFoundPage.jsx
 │   │   │   └── RegisterPage.jsx
-│   │   ├── services/
+│   │   ├── services/           # API service layer
 │   │   │   └── api.js
-│   │   ├── utils/
+│   │   ├── utils/              # Helper utilities
 │   │   │   ├── passwordRules.js
 │   │   │   └── token.js
 │   │   ├── App.jsx
@@ -55,12 +74,11 @@ smart-women-safety-route-planner/
 │   ├── vite.config.js
 │   └── package.json
 └── package.json
-```
 
-## Environment Variables
+## ⚙️ Configuration
 
-### Backend `.env`
-Copy `backend/.env.example` to `backend/.env` and fill in your values:
+### Backend Configuration
+Copy `backend/.env.example` to `backend/.env` and configure:
 
 ```env
 PORT=5001
@@ -69,72 +87,144 @@ JWT_SECRET=replace_with_a_strong_secret_at_least_32_chars
 CLIENT_URL=http://localhost:5173
 ```
 
-> **Note:** Port `5000` is reserved by macOS AirPlay Receiver on macOS Monterey+. Use `5001` instead, or disable AirPlay Receiver in **System Settings → General → AirDrop & Handoff**.
+> **⚠️ macOS Note:** Port `5000` is reserved by AirPlay Receiver on macOS Monterey+. Use `5001` instead, or disable AirPlay in **System Settings → General → AirDrop & Handoff**.
 
-### Frontend `.env`
+### Frontend Configuration
 Copy `frontend/.env.example` to `frontend/.env`:
 
 ```env
 VITE_API_URL=http://localhost:5001/api
 ```
 
-## Installation
+## 📦 Installation
+
+### Prerequisites
+- Node.js 18+ and npm
+- MongoDB running locally or a connection URI
+
+### Steps
 
 ```bash
-# Install backend dependencies
+# 1. Clone the repository
+git clone <repository-url>
+cd smart-women-safety-route-planner
+
+# 2. Install backend dependencies
 cd backend
 npm install
 
-# Install frontend dependencies
+# 3. Install frontend dependencies
 cd ../frontend
 npm install
+
+# 4. Create .env files
+# Copy .env.example files to .env in both frontend/
+# and backend/ directories
 ```
 
-## Run (Development)
+## 🏃 Running the Application
 
-Terminal 1 — Backend:
+### Development Mode
+
+Open **two terminal windows**:
+
+**Terminal 1 — Backend API:**
 ```bash
 cd backend
 npm run dev
+# Backend runs on http://localhost:5001
+# Health check: http://localhost:5001/api/health
 ```
 
-Terminal 2 — Frontend:
+**Terminal 2 — Frontend App:**
 ```bash
 cd frontend
 npm run dev
+# Frontend available at http://localhost:5173
 ```
 
-Frontend: `http://localhost:5173`  
-Backend API: `http://localhost:5001`  
-Health check: `http://localhost:5001/api/health`
+The application will open automatically. The frontend connects to the backend API at `http://localhost:5001`.
 
-## Build Frontend
+### Production Build
 
 ```bash
 npm run build --prefix frontend
 ```
 
-## Troubleshooting
+## 🔧 Troubleshooting
 
-| Symptom | Fix |
-|---|---|
-| `Cannot reach server...` | Backend is not running. Start it with `npm run dev` in `/backend`. |
-| `Database is unavailable...` | MongoDB is not running. Start it or check your `MONGO_URI`. |
-| `EADDRINUSE: port 5000` | macOS AirPlay Receiver holds port 5000. Use port `5001` (already set in `.env.example`). |
-| CORS error in console | Make sure frontend and backend are both running. CORS allows all `localhost` origins automatically. |
+| Issue | Solution |
+|-------|----------|
+| ❌ `Cannot reach server...` | Start the backend: `cd backend && npm run dev` |
+| ❌ `Database is unavailable...` | Start MongoDB or check `MONGO_URI` in `.env` |
+| ❌ `EADDRINUSE: port 5000` | macOS AirPlay blocking port 5000. Use port `5001` (default in `.env.example`), or disable AirPlay in System Settings. |
+| ❌ CORS error in console | Ensure both frontend and backend are running. CORS automatically allows `localhost` origins. |
+| ❌ JWT token not working | Clear browser cache/localStorage and login again. Ensure `JWT_SECRET` matches between backend restarts. |
 
-## Authentication Features
+## 📚 API Endpoints
 
-- **Register**: Full Name, Email, Password, Confirm Password
-  - Real-time password rule feedback
-  - Confirm Password mismatch validation
-  - Strong password enforcement (length, uppercase, lowercase, number, special char)
-  - Duplicate email rejection
-  - Password hashing with bcrypt (12 rounds)
-- **Login**: Email + Password
-  - JWT issued on success (1-hour expiration)
-  - JWT stored in `localStorage`
-  - "Remember me", "Forgot password?" UI
-  - Google and Apple OAuth buttons (UI only)
-- **Dashboard**: JWT-protected route on both frontend and backend
-- **Animated UI**: Glassmorphism design with Framer Motion animations
+### Authentication Endpoints
+- `POST /api/auth/register` — Create a new user account
+- `POST /api/auth/login` — Login and receive JWT token
+- `POST /api/auth/logout` — Logout and clear session
+
+### Protected Endpoints
+- `GET /api/health` — Health check endpoint
+- `GET /api/dashboard` — Access protected dashboard (requires JWT)
+
+## 🌟 Key Features at a Glance
+
+- ✅ Full-stack authentication with JWT
+- ✅ Secure password hashing (bcrypt)
+- ✅ Modern, responsive UI with Tailwind CSS
+- ✅ Real-time form validation
+- ✅ Production-ready code structure
+- ✅ MongoDB persistence
+- ✅ CORS-enabled
+- ✅ Environment-based configuration
+
+## 📝 License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+
+## 💡 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+---
+
+**Built with ❤️ for women safety**
+
+## ✨ Authentication Features
+
+### Registration
+- Full Name, Email, Password, Confirm Password fields
+- **Real-time password validation** with visual feedback
+- Password requirements:
+  - Minimum 8 characters
+  - Uppercase and lowercase letters
+  - At least one number
+  - At least one special character
+- Confirm Password mismatch detection
+- Duplicate email prevention
+- Password hashing with bcrypt (12 rounds)
+
+### Login
+- Email + Password authentication
+- JWT token generation (1-hour expiration)
+- Token stored securely in `localStorage`
+- "Remember me" UI support
+- "Forgot password?" UI (foundation ready)
+- OAuth buttons for Google and Apple (UI-ready)
+
+### Security & Protected Routes
+- JWT-based authentication on backend
+- Protected routes require valid token
+- Automatic route protection on frontend
+- CORS configured for `localhost` development
+
+### User Experience
+- Glassmorphism design with modern aesthetics
+- Smooth animations powered by Framer Motion
+- Real-time form validation feedback
+- Responsive design for all screen sizes
