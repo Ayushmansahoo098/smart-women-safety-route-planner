@@ -269,7 +269,7 @@ body {
 
 .login-input:focus {
   border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.18);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
 }
 
 .login-input-pw {
@@ -291,6 +291,23 @@ body {
 
 .login-eye:hover {
   color: #94a3b8;
+}
+
+.login-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+  cursor: pointer;
+  user-select: none;
+}
+
+.login-checkbox {
+  width: 1rem;
+  height: 1rem;
+  accent-color: #3b82f6;
+  cursor: pointer;
 }
 
 /* ── Alerts ─── */
@@ -507,10 +524,6 @@ body {
 }
 
 /* Input focus highlight (already handled in .login-input:focus, extra glow) */
-.login-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.22);
-}
 
 /* Hero gradient animated overlay */
 .auth-hero-gradient {

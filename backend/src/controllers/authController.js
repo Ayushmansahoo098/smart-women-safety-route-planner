@@ -13,6 +13,18 @@ function isValidEmail(email = "") {
   return EMAIL_REGEX.test(email);
 }
 
+function signJwt(user) {
+  return jwt.sign(
+    {
+      sub: user.id,
+      name: user.name,
+      email: user.email
+    },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" }
+  );
+}
+
 async function registerUser(req, res) {
   try {
     const { name, email, password } = req.body;
@@ -50,7 +62,8 @@ async function registerUser(req, res) {
     await User.create({
       name: trimmedName,
       email: normalizedEmail,
-      password: hashedPassword
+      password: hashedPassword,
+      provider: "local"
     });
 
     return res.status(201).json({
@@ -93,6 +106,13 @@ async function loginUser(req, res) {
       });
     }
 
+    // Prevent social-only (Google) accounts from using password login
+    if (user.provider !== "local" || !user.password) {
+      return res.status(401).json({
+        message: `This account uses ${user.provider} login. Please sign in with ${user.provider}.`
+      });
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -100,15 +120,7 @@ async function loginUser(req, res) {
       });
     }
 
-    const token = jwt.sign(
-      {
-        sub: user.id,
-        name: user.name,
-        email: user.email
-      },
-      process.env.JWT_SECRET,
-      { expiresIn: "1h" }
-    );
+    const token = signJwt(user);
 
     return res.status(200).json({
       message: "Login successful.",
@@ -126,5 +138,28 @@ async function loginUser(req, res) {
   }
 }
 
-export { loginUser, registerUser };
+/**
+ * Called after Passport has successfully authenticated the user via Google.
+ * Signs a JWT and redirects the browser to the frontend /oauth-callback route
+ * with the token as a query param.
+ */
+function oauthCallback(req, res) {
+  try {
+    if (!req.user) {
+      const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+      return res.redirect(`${clientUrl}/login?error=oauth_failed`);
+    }
 
+    const token = signJwt(req.user);
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+
+    return res.redirect(
+      `${clientUrl}/oauth-callback?token=${encodeURIComponent(token)}`
+    );
+  } catch {
+    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
+    return res.redirect(`${clientUrl}/login?error=oauth_failed`);
+  }
+}
+
+export { loginUser, oauthCallback, registerUser };

@@ -1,10 +1,18 @@
 import dotenv from "dotenv";
 import app from "./app.js";
-import { connectDatabase, isDatabaseConnected } from "./config/db.js";
+import { connectDatabase } from "./config/db.js";
 
 dotenv.config();
 
 const REQUIRED_ENV = ["MONGO_URI", "JWT_SECRET"];
+
+const OAUTH_ENV = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET"];
+const missingOAuth = OAUTH_ENV.filter((key) => !process.env[key]);
+if (missingOAuth.length > 0) {
+  console.warn(
+    `⚠️  Google OAuth env vars not set (${missingOAuth.join(", ")}). Google login will be disabled.`
+  );
+}
 const missingEnv = REQUIRED_ENV.filter((key) => !process.env[key]);
 
 if (missingEnv.length > 0) {
@@ -20,12 +28,6 @@ async function bootstrap() {
 
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
-
-      if (!isDatabaseConnected()) {
-        console.log(
-          "Server started without MongoDB connection. Auth endpoints will return 503."
-        );
-      }
     });
   } catch (error) {
     console.error("Server startup failed:", error);

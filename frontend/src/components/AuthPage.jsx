@@ -12,7 +12,7 @@ export default function AuthPage({ initialMode = "login" }) {
 
     // All hooks must run unconditionally — before any early return
     const [mode, setMode] = useState(
-        location.pathname === "/register" ? "signup" : initialMode
+        initialMode !== "login" ? initialMode : (location.pathname === "/register" ? "signup" : "login")
     );
     const [successMessage, setSuccessMessage] = useState("");
 

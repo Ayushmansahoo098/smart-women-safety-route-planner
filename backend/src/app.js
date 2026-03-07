@@ -1,7 +1,12 @@
 import cors from "cors";
 import express from "express";
+import passport from "passport";
+import { configurePassport } from "./config/passport.js";
 import authRoutes from "./routes/authRoutes.js";
 import protectedRoutes from "./routes/protectedRoutes.js";
+
+// Configure Google Passport strategy
+configurePassport();
 
 const app = express();
 
@@ -31,6 +36,11 @@ app.use(
 );
 
 app.use(express.json());
+// Needed for parsing JSON bodies
+app.use(express.urlencoded({ extended: true }));
+
+// Initialise Passport (no persistent session — we use JWT)
+app.use(passport.initialize());
 
 app.get("/api/health", (_, res) => {
   res.status(200).json({ message: "API is healthy." });
@@ -39,11 +49,12 @@ app.get("/api/health", (_, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/protected", protectedRoutes);
 
-app.use((_, res) => {
+app.use((_req, res) => {
   res.status(404).json({ message: "Endpoint not found." });
 });
 
-app.use((error, _, res, __) => {
+// eslint-disable-next-line no-unused-vars
+app.use((error, _req, res, _next) => {
   console.error(error);
   res.status(500).json({ message: "Internal server error." });
 });

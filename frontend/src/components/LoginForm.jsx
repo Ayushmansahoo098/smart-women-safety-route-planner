@@ -5,6 +5,8 @@ import { clearAuthToken, setAuthToken } from "../utils/authStorage";
 import { getApiErrorMessage } from "../utils/errorMessage";
 import WaveText from "./WaveText";
 
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || "http://localhost:5001";
+
 /* ─── tiny SVG icons ─── */
 function IconMail() {
     return (
@@ -61,13 +63,7 @@ function GoogleLogo() {
         </svg>
     );
 }
-function AppleLogo() {
-    return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4 text-white">
-            <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
-        </svg>
-    );
-}
+
 
 export default function LoginForm({ onSwitchToSignup, successMessage }) {
     const navigate = useNavigate();
@@ -81,6 +77,18 @@ export default function LoginForm({ onSwitchToSignup, successMessage }) {
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const locationMessage = location.state?.message || successMessage || "";
+
+    // Pick up ?error=oauth_failed from the redirect back from the server
+    const urlParams = new URLSearchParams(location.search);
+    const oauthError = urlParams.get("error");
+    const oauthErrorMessage =
+        oauthError === "google_failed"
+            ? "Google sign-in failed. Please try again."
+            : oauthError === "google_not_configured"
+                ? "Google sign-in is not yet configured on this server."
+                : oauthError === "oauth_failed"
+                    ? "Social sign-in failed. Please try again."
+                    : "";
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -109,6 +117,11 @@ export default function LoginForm({ onSwitchToSignup, successMessage }) {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    // Redirect browser to the Google OAuth route — full redirect flow
+    const handleGoogleLogin = () => {
+        window.location.href = `${BACKEND_URL}/api/auth/google`;
     };
 
     return (
@@ -176,12 +189,26 @@ export default function LoginForm({ onSwitchToSignup, successMessage }) {
                     </div>
                 </div>
 
+                {/* Remember Me */}
+                <div className="login-field">
+                    <label className="login-checkbox-label" htmlFor="remember-me">
+                        <input
+                            id="remember-me"
+                            type="checkbox"
+                            checked={rememberMe}
+                            onChange={(e) => setRememberMe(e.target.checked)}
+                            className="login-checkbox"
+                        />
+                        Remember Me
+                    </label>
+                </div>
+
                 {/* Alerts */}
                 {locationMessage && (
                     <p className="login-alert login-alert-success">{locationMessage}</p>
                 )}
-                {error && (
-                    <p className="login-alert login-alert-error">{error}</p>
+                {(error || oauthErrorMessage) && (
+                    <p className="login-alert login-alert-error">{error || oauthErrorMessage}</p>
                 )}
 
                 {/* Submit */}
@@ -202,25 +229,18 @@ export default function LoginForm({ onSwitchToSignup, successMessage }) {
                     <span className="login-divider-line" />
                 </div>
 
-                {/* OAuth */}
-                <div className="login-oauth">
+                {/* OAuth Button — "Continue with Google" */}
+                <div className="login-oauth" style={{ display: "flex" }}>
                     <button
                         type="button"
                         id="google-login-btn"
                         className="login-oauth-btn auth-social-scale"
-                        title="Coming soon"
+                        onClick={handleGoogleLogin}
+                        aria-label="Continue with Google"
+                        style={{ flex: 1 }}
                     >
                         <GoogleLogo />
-                        <WaveText text="Google" speed={0.07} />
-                    </button>
-                    <button
-                        type="button"
-                        id="apple-login-btn"
-                        className="login-oauth-btn auth-social-scale"
-                        title="Coming soon"
-                    >
-                        <AppleLogo />
-                        <WaveText text="Apple" speed={0.07} />
+                        <WaveText text="Continue with Google" speed={0.05} />
                     </button>
                 </div>
 

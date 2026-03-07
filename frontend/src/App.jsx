@@ -5,6 +5,7 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import DashboardPage from "./pages/DashboardPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import NotFoundPage from "./pages/NotFoundPage";
+import OAuthCallbackPage from "./pages/OAuthCallbackPage";
 
 function PageTransition({ children }) {
   return (
@@ -58,6 +59,8 @@ export default function App() {
             </PageTransition>
           }
         />
+        {/* OAuth callback — no animation, immediately redirects */}
+        <Route path="/oauth-callback" element={<OAuthCallbackPage />} />
         <Route
           path="/dashboard"
           element={
