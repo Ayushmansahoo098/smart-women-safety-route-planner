@@ -4,6 +4,7 @@
  * Matches the "Route Intelligence" section in the mockup.
  */
 
+import { useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 
 // ── Route data (US-themed) ─────────────────────────────────────────────
@@ -60,6 +61,29 @@ const WalkIcon = () => (
 );
 
 export default function RouteIntelligence({ activeRoute, setActiveRoute }) {
+    // Listen for confirmed route changes from the MapView warning dialog
+    // so we can update the active route in the parent.
+    const handleCardClick = (routeId) => {
+        if (routeId === activeRoute) return; // already selected – no warning needed
+        // Fire custom event; MapView will show warning dialog.
+        // On confirm, MapView fires sr:routeConfirmed → we update state.
+        window.dispatchEvent(new CustomEvent("sr:routeCardClick", { detail: { routeIdx: routeId } }));
+    };
+
+    // Register listener for confirmed changes (set up once)
+    // We'll use a ref trick: just call setActiveRoute from a stable listener.
+    const setActiveRef = useRef(setActiveRoute);
+    useEffect(() => { setActiveRef.current = setActiveRoute; }, [setActiveRoute]);
+
+    useEffect(() => {
+        const onConfirm = (e) => {
+            const idx = e.detail?.routeIdx;
+            if (idx !== undefined) setActiveRef.current(idx);
+        };
+        window.addEventListener("sr:routeConfirmed", onConfirm);
+        return () => window.removeEventListener("sr:routeConfirmed", onConfirm);
+    }, []);
+
     return (
         <div style={{ padding: "1rem", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
             {/* Section header */}
@@ -72,7 +96,7 @@ export default function RouteIntelligence({ activeRoute, setActiveRoute }) {
                 {ROUTES.map((route, i) => (
                     <motion.button
                         key={route.id}
-                        onClick={() => setActiveRoute(route.id)}
+                        onClick={() => handleCardClick(route.id)}
                         initial={{ opacity: 0, x: -12 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ delay: i * 0.08, duration: 0.3 }}
