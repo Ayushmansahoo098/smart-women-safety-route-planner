@@ -166,7 +166,7 @@ export default function RegisterPage() {
           <h1 style={{ fontSize: "1.8rem", fontWeight: 700, color: "#fff", margin: "0 0 0.3rem" }}>
             Create Account
           </h1>
-          <p style={{ color: "#64748b", fontSize: "0.9rem", margin: "0 0 2rem" }}>
+          <p style={{ ayushmancolor: "#64748b", fontSize: "0.9rem", margin: "0 0 2rem" }}>
             Set up your account to access your dashboard.
           </p>
 

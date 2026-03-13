@@ -1,92 +1,130 @@
-import { useEffect, useState } from "react";
+/**
+ * DashboardPage.jsx
+ * Main Safe Route dashboard — assembles Navbar, Sidebar, and MapView.
+ * Route search state lives here and is passed down to MapView (real Leaflet)
+ * and AIRiskBreakdown.
+ */
+
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import api from "../services/api";
 import { clearAuthToken } from "../utils/authStorage";
-import { getApiErrorMessage } from "../utils/errorMessage";
+import { planRoute } from "../services/routingService";
+
+// ── Sub-components ─────────────────────────────────────────────────────
+import Navbar from "../components/dashboard/Navbar";
+import RouteInputs from "../components/dashboard/RouteInputs";
+import RouteIntelligence from "../components/dashboard/RouteIntelligence";
+import AIRiskBreakdown from "../components/dashboard/AIRiskBreakdown";
+import MapView from "../components/dashboard/MapView";
+import EmergencyButton from "../components/dashboard/EmergencyButton";
 
 export default function DashboardPage() {
   const navigate = useNavigate();
-  const [data, setData] = useState(null);
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setIsLoading(true);
-        const response = await api.get("/protected/dashboard");
-        setData(response.data);
-      } catch (requestError) {
-        const statusCode = requestError.response?.status;
-        const message = getApiErrorMessage(
-          requestError,
-          "Unable to load dashboard right now."
-        );
+  // ── Route selection (decorative sidebar cards) ──────────────────────
+  const [activeRoute, setActiveRoute] = useState(0);
 
-        if (statusCode === 401) {
-          clearAuthToken();
-          navigate("/login", { replace: true });
-          return;
-        }
+  // ── Location text state (shared Navbar ↔ RouteInputs) ───────────────
+  const [fromLocation, setFromLocation] = useState("");
+  const [toLocation, setToLocation] = useState("");
 
-        setError(message);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchDashboardData();
-  }, [navigate]);
+  // ── Real route search state ──────────────────────────────────────────
+  const [routeResult, setRouteResult] = useState(null); // null = decorative map
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchError, setSearchError] = useState(null);
 
   const handleLogout = () => {
     clearAuthToken();
     navigate("/login", { replace: true });
   };
 
+  // ── Search handler: geocode + fetch OSRM route ───────────────────────
+  const handleSearch = async (from, to) => {
+    setIsSearching(true);
+    setSearchError(null);
+    setRouteResult(null);
+    try {
+      const result = await planRoute(from, to);
+      setRouteResult(result);
+    } catch (err) {
+      setSearchError(err.message || "Could not find a route. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  // ── Reset to decorative map ──────────────────────────────────────────
+  const handleReset = () => {
+    setRouteResult(null);
+    setSearchError(null);
+  };
+
   return (
-    <div className="min-h-screen bg-slate-950 px-4 py-12 text-slate-100">
-      <motion.main
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, ease: "easeOut" }}
-        className="mx-auto w-full max-w-4xl rounded-3xl border border-white/15 bg-white/10 p-7 shadow-glass backdrop-blur-xl"
-      >
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <h1 className="text-2xl font-semibold text-white">Dashboard</h1>
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20"
-          >
-            Logout
-          </button>
+    <div
+      className="flex flex-col h-screen overflow-hidden"
+      style={{ background: "#0d1117", fontFamily: "'Inter', 'Segoe UI', sans-serif" }}
+    >
+      {/* ── Top Navbar ── */}
+      <Navbar
+        fromLocation={fromLocation}
+        setFromLocation={setFromLocation}
+        toLocation={toLocation}
+        setToLocation={setToLocation}
+        onLogout={handleLogout}
+      />
+
+      {/* ── Body: Sidebar + Map ── */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* ── Left Sidebar ── */}
+        <motion.aside
+          initial={{ x: -40, opacity: 0 }}
+          animate={{ x: 0, opacity: 1 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          style={{
+            width: "320px",
+            minWidth: "320px",
+            background: "#12161f",
+            borderRight: "1px solid rgba(255,255,255,0.07)",
+            display: "flex",
+            flexDirection: "column",
+            overflowY: "auto",
+            overflowX: "hidden",
+            gap: 0,
+          }}
+        >
+          {/* Route search card */}
+          <RouteInputs
+            from={fromLocation}
+            setFrom={setFromLocation}
+            to={toLocation}
+            setTo={setToLocation}
+            onSearch={handleSearch}
+            isLoading={isSearching}
+            hasResult={!!routeResult}
+            onReset={handleReset}
+            error={searchError}
+          />
+
+          {/* Route intelligence cards */}
+          <RouteIntelligence activeRoute={activeRoute} setActiveRoute={setActiveRoute} />
+
+          {/* AI Risk Breakdown gauge */}
+          <AIRiskBreakdown activeRoute={activeRoute} />
+
+          {/* SOS Emergency button */}
+          <EmergencyButton />
+        </motion.aside>
+
+        {/* ── Map Area ── */}
+        <div className="flex-1 relative overflow-hidden">
+          <MapView
+            activeRoute={activeRoute}
+            routeResult={routeResult}
+            isSearching={isSearching}
+          />
         </div>
-
-        {isLoading ? (
-          <p className="mt-6 text-sm text-slate-300">Loading dashboard...</p>
-        ) : null}
-
-        {error ? (
-          <p className="mt-6 rounded-lg border border-rose-200/20 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
-            {error}
-          </p>
-        ) : null}
-
-        {data ? (
-          <section className="mt-6 space-y-3 rounded-2xl border border-white/10 bg-black/20 p-5">
-            <p className="text-sm text-slate-300">{data.message}</p>
-            <div className="space-y-1 text-sm text-slate-200">
-              <p>
-                <span className="text-slate-400">Name:</span> {data.user?.name}
-              </p>
-              <p>
-                <span className="text-slate-400">Email:</span> {data.user?.email}
-              </p>
-            </div>
-          </section>
-        ) : null}
-      </motion.main>
+      </div>
     </div>
   );
 }
