@@ -2,9 +2,10 @@
   "name": "server",
   "version": "1.0.0",
   "description": "Backend for Women Safety Route Planner",
-  "main": "index.js",
+  "main": "server.js",
+  "type": "commonjs",
   "scripts": {
-    "start": "node index.js"
+    "start": "node server.js"
   },
   "author": "",
   "license": "ISC",

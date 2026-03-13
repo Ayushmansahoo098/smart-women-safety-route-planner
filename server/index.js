@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+<<<<<<< HEAD
 const routeRoutes = require("./routes/routeRoutes")
 // Import routes
 const riskRoutes = require("./routes/riskRoutes");
@@ -25,3 +26,18 @@ app.get("/", (req,res)=>{
 app.listen(5000, ()=>{
     console.log("Server running on port 5000");
 });
+=======
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.send("Backend running successfully 🚀");
+});
+
+app.listen(5050, () => {
+  console.log("Server running on port 5050");
+});
+
+>>>>>>> 92c528feaadbda698516a436d492a29fe8478a94
