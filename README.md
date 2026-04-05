@@ -1,4 +1,4 @@
-# 🛡️ Smart Women Safety Route Planner
+# 🛡️ SafeRoute
 
 > A production-ready full-stack authentication system with secure JWT-based middleware, real-time password validation, and a modern glassmorphic UI.
 
